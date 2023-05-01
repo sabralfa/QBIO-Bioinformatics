@@ -1,0 +1,50 @@
+# Accessing RNA-experiment: 
+
+# The same script is used for both gene sequence analysis.
+# For downloading the fastq files from NCBI we used the SRA_toolkit: 
+# 1. Installation 
+
+wget --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
+tar -vxzf sratoolkit.tar.gz
+which fastq-dump
+
+# 2. Downloading
+
+fastq-dump --split-3 SRR7388614
+fastq-dump --split-3 SRR7388613
+fastq-dump --split-3 SRR7388612
+fastq-dump --split-3 SRR7388611
+fastq-dump --split-3 SRR7388610
+fastq-dump --split-3 SRR7388609
+fastq-dump --split-3 SRR7388608
+fastq-dump --split-3 SRR7388607
+
+
+
+# Trimming fastq files:
+
+# To Preprocess reads it is important to decide which kind of library one has, either paired-end or single-end. Moreover, with Trimmomatic one can clip adapter, quality and discard reads according to the chosen parameters.
+# For improving the quality of the data we trimmed it with the tool Trimmomatic. All files have been trimmed with the same parameters 
+
+java -jar ./Trimmomatic-0.39/trimmomatic-0.39.jar SE SRR7388612.fastq SRR7388612.trim.fastq.gz ILLUMINACLIP:./Trimmomatic-0.39/adapters/TruSeq3-SE.fa:2:30:10 HEADCROP:5 SLIDINGWINDOW:4:15 MINLEN:70
+
+
+# Kallisto: 
+
+# Pseudomapping and counting is also a part of which was conducted in the terminal. One of the highlights of pseudomapping is that it avoids the issue of computationally intensive and time-consuming runs by not relying on a reference genome or transcriptome and instead quickly assigns reads to transcripts based on their k-mer composition.
+# Prior to running a kallisto a reference fasta file had to be downloaded 
+
+wget https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-56/fasta/theobroma_cacao_criollo/cdna/Theobroma_cacao_criollo.Criollo_cocoa_genome_V2.cdna.all.fa.gz
+
+
+#Indexing against transcriptome: 
+
+kallisto index -i Theobroma_cacao_criollo.Criollo_cocoa_genome_V2.cdna.all.index Theobroma_cacao_criollo.Criollo_cocoa_genome_V2.cdna.all.fa.gz
+
+
+# Alignment:
+
+kallisto quant -i Theobroma_cacao_criollo.Criollo_cocoa_genome_V2.cdna.all.index -o control1 -t 4 --single -l 180 -s 20 SRR7388607.trim.fastq.gz
+
+
+# All files were aligned with the same kallisto parameters 
